@@ -4,6 +4,7 @@ import System.IO
 import System.IO.Error
 import Test.QuickCheck
 import Data.List
+import Data.Maybe
 
 {-
 # SOF3: Block 5 Problems
@@ -87,8 +88,11 @@ Define a strict version of `foldr`, `foldr'`.  When is it appropriate
 to use `foldr'`?
 -}
 foldr' :: (a -> b -> b) -> b -> [a] -> b
-foldr' = undefined
 
+foldr' f i = doFold
+ where
+  doFold [] = i
+  doFold (x:xs) = f x $! doFold xs
 {-
 ## Question: Testing
 
@@ -106,8 +110,9 @@ checkMarks students = checkStudents students
   checkStudents (x@(Student y):xs) | checkStudent y = checkStudents xs
                                    | otherwise = False
   checkStudent [] = True
-  checkStudent (y@(mod,mark):ys) | mark == Nothing = False
-                                | otherwise = checkStudent ys
+  checkStudent (y@(mod,mark):ys) | mark == Nothing = checkStudent ys
+                                 | fromJust(mark) > 100 || fromJust(mark) < 0 = False
+                                 | otherwise = checkStudent ys
 
 
 csStage, csStage1, csStage2 :: [Student]
@@ -157,7 +162,8 @@ quarterId :: (Fractional a) => a -> a
 quarterId = (*4) . quarter
 
 prop_quarter :: Float ->  Bool
-prop_quarter = undefined
+prop_quarter x = quarterId x == id x
+
 
 
 {-
@@ -173,7 +179,8 @@ listOrdered xs = snd $ foldr go (Nothing, True) xs
 
 
 prop_listOrdered :: String -> Bool
-prop_listOrdered = undefined
+prop_listOrdered x = listOrdered x == (id x == sort x)
+                   
 
 {-
 ### Problem 5 - QuickCheck 
@@ -181,8 +188,11 @@ Given a datatype `Module`, use `Gen` from the `Test.QuickCheck` module to genera
 
 -}
 
+rModule :: Gen Module
+rModule = oneof [return SOF1, return THE1, return THE2, return SOF2, return DAT1, return SYS1, return HCI1]
 
 instance Arbitrary Module where
+ arbitrary = rModule
 -- sample $ (arbitrary :: Gen Module)
 {-
 ### Problem 6 - QuickCheck 
@@ -190,9 +200,21 @@ Given that a student has type: `newtype Student = Student [(Module, Maybe Int)]`
 Note: a randomly generated `Student` can have the same `Module` multiple time and mark outsite the range 0-100.
 
 -}
+-- newtype Student = Student [(Module, Maybe Int)] deriving Show
+{-
+rStud :: Gen Student
+rStud = return Student
 
-
+rStudent :: Gen [(Module, Maybe Int)]
+rStudent = oneof [return Empty,
+                 do m <- rModule
+                    k <- arbitrary :: Gen (Maybe Int)
+                    s <- rStudent
+                    return Add((m,k),s)]-}
 instance Arbitrary Student where
+ arbitrary = do 
+ lStud <- arbitrary
+ return $ Student lStud
 -- sample $ (arbitrary :: Gen Student)
 
 
