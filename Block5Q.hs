@@ -138,8 +138,11 @@ checkPrereqs stud = doCheckPrereqs stud (prereqs stud [])
   formPrereq (x@(mod,mark):xs) p = formPrereq xs (p ++ [mod])
   doCheckPrereqs (Student x) p = doCheckPrereq x p
   doCheckPrereq [] p = True
-  doCheckPrereq (x@(mod, mark):xs) p | (prereq mod) `elem` p = doCheckPrereq xs p
+  doCheckPrereq (x@(mod, mark):xs) p | checkModule (prereq mod) p = doCheckPrereq xs p
                                      | otherwise = False
+  checkModule []  p = True
+  checkModule (x:xs) p | x `elem` p = checkModule xs p
+                       | otherwise = False
 
 
 {-
