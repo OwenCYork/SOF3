@@ -55,10 +55,47 @@ Prove this theorem.
 **Hint** Prove this as four cases, one for each pair of `Bool` values.
 -}
 niffCommutative :: Bool -> Bool -> ProofLayout Bool
-niffCommutative True  True  = undefined
-niffCommutative True  False = undefined
-niffCommutative False True  = undefined
-niffCommutative False False = undefined
+niffCommutative True  True  = 
+ flip niff True True
+ :=:
+ niff True True
+ :=:
+ QED
+niffCommutative True  False = 
+ flip niff True False
+ :=:
+ niff False True
+ :=:
+ not True
+ :=:
+ False
+ :=:
+ id False
+ :=:
+ niff True False
+ :=:
+ QED
+niffCommutative False True  = 
+ flip niff False True
+ :=:
+ niff True False
+ :=:
+ id False
+ :=:
+ False
+ :=:
+ not True
+ :=:
+ niff False True
+ :=:
+ QED
+
+niffCommutative False False = 
+ flip niff False False
+ :=:
+ niff False False
+ :=:
+ QED
 
 {-
 ## Q2: Interactive tic-tac-toe
